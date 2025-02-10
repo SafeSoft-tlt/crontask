@@ -15,19 +15,19 @@ class Task extends Model
      *
      * @var array
      */
-    protected $fillable = ['status', 'method_name', 'cron_expression', 'is_one_time', 'updated'];
+    protected $fillable = ['status', 'method_name', 'cron_expression', 'is_one_time', 'finished'];
 
     /**
      * Получает задачу для выполнения.
      *
      * @return Task|null
      */
-    public static function getTaskForExecution(): ?Task
-    {
-        return self::where('status', 'pending')
-            ->lockForUpdate()
-            ->first();
-    }
+    // public static function getTaskForExecution(): ?Task
+    // {
+    //     return self::where('status', 'pending')
+    //         ->lockForUpdate()
+    //         ->first();
+    // }
 
     /**
      * Отмечает задачу как выполняющуюся.
@@ -48,7 +48,7 @@ class Task extends Model
      */
     public function markAsCompleted(): bool
     {
-        return $this->update(['status' => 'completed']);
+        return $this->update(['status' => 'completed', 'finished' => Carbon::now()]);
     }
 
     /**
@@ -68,7 +68,7 @@ class Task extends Model
      */
     public function resetToPending(): bool
     {
-        return $this->update(['status' => 'pending', 'updated' => Carbon::now()->addSeconds(30)]);
+        return $this->update(['status' => 'pending']);
     }
 
     /**

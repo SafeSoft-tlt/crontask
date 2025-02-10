@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use App\Models\Task;
 use App\Models\Log;
 use Cron\CronExpression;
@@ -41,13 +42,18 @@ class ExecuteTask extends Command
         $now = new DateTime();
         $this->info('Текущее время ' . $now->format('Y-m-d H:i:s'));
 
-        // Получаем все задачи со статусом 'pending', которые были обновлены более минуты назад
-        $tasks = Task::where('status', 'pending')
-        ->where(function($query) {
-            $query->whereNull('updated')
-                  ->orWhere('updated', '<=', Carbon::now());
-        })
-        ->get();
+        // Сбрасываем флаг 'complite'
+        DB::table('tasks')
+        ->where('status', 'completed')
+        ->where('is_one_time', 0)
+        ->where(DB::raw('ROUND(UNIX_TIMESTAMP(finished) / 60)'), '<', round(Carbon::now()->timestamp / 60))
+        ->update(['status' => 'pending']);
+        //$this->info('Текущее время в минутах ' . round(Carbon::now()->timestamp / 60));
+        //$this->info('Текущее время в Carbon ' . Carbon::now()->format('Y-m-d H:i:s'));
+        //return;
+                
+        // Получаем все задачи со статусом 'pending'
+        $tasks = Task::where('status', 'pending')->get();
 
         $this->info('Кол-во: ' . $tasks->count());
 
@@ -70,11 +76,6 @@ class ExecuteTask extends Command
 
                         // Обновляем статус задачи на 'completed'
                         $task->markAsCompleted();
-
-                        // Если задача не одноразовая, сбрасываем статус на 'pending' и обновляем updated_at
-                        if (!$task->isOneTimeTask()) {
-                            $task->resetToPending();
-                        }
 
                         // Добавляем запись в таблицу log
                         $this->logTaskCompletion($task);

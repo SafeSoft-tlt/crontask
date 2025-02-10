@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('cron_expression');
             $table->boolean('is_one_time')->default(false);
             $table->text('data');
-            $table->timestamp('updated', 0)->nullable();
+            $table->timestamp('finished', 0)->nullable();
             $table->timestamps();
         });
     }
