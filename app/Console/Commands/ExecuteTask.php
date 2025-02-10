@@ -38,19 +38,20 @@ class ExecuteTask extends Command
      */
     public function handle(): void
     {
+        $this->info('');
         // Получаем текущее время
         $now = new DateTime();
         $this->info('Текущее время ' . $now->format('Y-m-d H:i:s'));
 
-        // Сбрасываем флаг 'complite'
-        DB::table('tasks')
-        ->where('status', 'completed')
-        ->where('is_one_time', 0)
-        ->where(DB::raw('ROUND(UNIX_TIMESTAMP(finished) / 60)'), '<', round(Carbon::now()->timestamp / 60))
-        ->update(['status' => 'pending']);
-        //$this->info('Текущее время в минутах ' . round(Carbon::now()->timestamp / 60));
-        //$this->info('Текущее время в Carbon ' . Carbon::now()->format('Y-m-d H:i:s'));
-        //return;
+        // Получаем все задачи (не одноразовые) со статусом 'completed' и если наступила новая минута ставим статус 'pending'
+        $tasks = Task::where('status', 'completed')->where('is_one_time', 0)->get();
+        foreach ($tasks as $task) {
+            if (round(Carbon::parse($task->finished)->timestamp / 60) < round(Carbon::now()->timestamp / 60)) {
+                $task->resetToPending();
+            }
+        }
+        $this->info(round(Carbon::parse($task->finished)->timestamp / 60) . ' < '. round(Carbon::now()->timestamp / 60));
+
                 
         // Получаем все задачи со статусом 'pending'
         $tasks = Task::where('status', 'pending')->get();
@@ -61,6 +62,7 @@ class ExecuteTask extends Command
             // Создаем объект CronExpression для проверки расписания
             $cron = new CronExpression($task->cron_expression);
             $this->info('Время для задачи: ' . $task->method_name . ' ' . $cron->getNextRunDate()->format('Y-m-d H:i:s'));
+            $this->info('Время в минутах последнего выполнения задачи: ' . $task->method_name . ' ' . $task->finished);
 
             // Проверяем, соответствует ли текущее время cron-расписанию
             if ($cron->isDue($now)) {
