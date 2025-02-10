@@ -45,7 +45,7 @@
 
    ```bash
    git clone git@github.com:SafeSoft-tlt/crontask.git
-   cd distributed-cron
+   cd crontask
    ```
 
 2. **Настройка переменных окружения**:
