@@ -68,7 +68,7 @@ class Task extends Model
      */
     public function resetToPending(): bool
     {
-        return $this->update(['status' => 'pending', 'updated' => Carbon::now()->subMinute()]);
+        return $this->update(['status' => 'pending', 'updated' => Carbon::now()->addSeconds(30)]);
     }
 
     /**

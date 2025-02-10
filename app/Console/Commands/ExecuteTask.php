@@ -45,7 +45,7 @@ class ExecuteTask extends Command
         $tasks = Task::where('status', 'pending')
         ->where(function($query) {
             $query->whereNull('updated')
-                  ->orWhere('updated', '<=', Carbon::now()->subMinute());
+                  ->orWhere('updated', '<=', Carbon::now());
         })
         ->get();
 
