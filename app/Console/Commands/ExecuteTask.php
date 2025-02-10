@@ -43,7 +43,10 @@ class ExecuteTask extends Command
 
         // Получаем все задачи со статусом 'pending', которые были обновлены более минуты назад
         $tasks = Task::where('status', 'pending')
-        ->where('updated', '<=', Carbon::now()->subMinute())
+        ->where(function($query) {
+            $query->whereNull('updated')
+                  ->orWhere('updated', '<=', Carbon::now()->subMinute());
+        })
         ->get();
 
         $this->info('Кол-во: ' . $tasks->count());
