@@ -50,7 +50,7 @@ class ExecuteTask extends Command
                 $task->resetToPending();
             }
         }
-        $this->info(round(Carbon::parse($task->finished)->timestamp / 60) . ' < '. round(Carbon::now()->timestamp / 60));
+        //$this->info(round(Carbon::parse($task->finished)->timestamp / 60) . ' < '. round(Carbon::now()->timestamp / 60));
 
                 
         // Получаем все задачи со статусом 'pending'
