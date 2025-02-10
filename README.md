@@ -87,7 +87,7 @@
    Убедитесь, что приложение запущено и работает. Вы можете проверить логи:
 
    ```bash
-   sudo docker logs <имя_контейнера>
+   sudo docker logs app-cron-task
    ```
 
 Теперь вы готовы использовать Distributed Cron Task Manager для управления Cron-задачами.
