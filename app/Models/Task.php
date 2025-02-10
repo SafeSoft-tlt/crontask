@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * Класс Task представляет задачу в системе.
@@ -14,7 +15,7 @@ class Task extends Model
      *
      * @var array
      */
-    protected $fillable = ['status', 'method_name', 'cron_expression', 'is_one_time'];
+    protected $fillable = ['status', 'method_name', 'cron_expression', 'is_one_time', 'updated'];
 
     /**
      * Получает задачу для выполнения.
@@ -67,7 +68,7 @@ class Task extends Model
      */
     public function resetToPending(): bool
     {
-        return $this->update(['status' => 'pending']);
+        return $this->update(['status' => 'pending', 'updated' => Carbon::now()->subMinute()]);
     }
 
     /**

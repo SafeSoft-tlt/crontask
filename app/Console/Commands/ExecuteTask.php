@@ -6,8 +6,10 @@ use Illuminate\Console\Command;
 use App\Models\Task;
 use App\Models\Log;
 use Cron\CronExpression;
+use Carbon\Carbon;
 use Exception;
 use DateTime;
+
 
 /**
  * Класс ExecuteTask выполняет задачи по cron-расписанию.
@@ -39,10 +41,12 @@ class ExecuteTask extends Command
         $now = new DateTime();
         $this->info('Текущее время ' . $now->format('Y-m-d H:i:s'));
 
-        // Получаем все задачи со статусом 'pending'
-        $tasks = Task::where('status', 'pending')->get();
+        // Получаем все задачи со статусом 'pending', которые были обновлены более минуты назад
+        $tasks = Task::where('status', 'pending')
+        ->where('updated', '<=', Carbon::now()->subMinute())
+        ->get();
 
-        $this->info('Кол-во:  ' . $tasks->count());
+        $this->info('Кол-во: ' . $tasks->count());
 
         foreach ($tasks as $task) {
             // Создаем объект CronExpression для проверки расписания
@@ -52,18 +56,19 @@ class ExecuteTask extends Command
             // Проверяем, соответствует ли текущее время cron-расписанию
             if ($cron->isDue($now)) {
                 $this->info('Проверяем задачу: ' . $task->method_name);
+
                 // Пытаемся отметить задачу как выполняющуюся
                 if ($task->markAsRunning()) {
                     try {
                         $this->info('Берём задачу: ' . $task->method_name);
-                        
+
                         // Выполняем логику задачи
                         $this->executeTaskLogic($task);
 
                         // Обновляем статус задачи на 'completed'
                         $task->markAsCompleted();
 
-                        // Если задача не одноразовая, сбрасываем статус на 'pending'
+                        // Если задача не одноразовая, сбрасываем статус на 'pending' и обновляем updated_at
                         if (!$task->isOneTimeTask()) {
                             $task->resetToPending();
                         }
@@ -80,6 +85,7 @@ class ExecuteTask extends Command
             }
         }
     }
+
 
     /**
      * Выполняет логику задачи.
