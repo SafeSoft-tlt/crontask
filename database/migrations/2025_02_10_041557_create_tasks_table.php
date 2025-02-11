@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('status')->default('pending');
-            $table->string('method_name');
-            $table->string('cron_expression');
-            $table->boolean('is_one_time')->default(false);
-            $table->text('data');
-            $table->timestamp('finished', 0)->nullable();
+            $table->enum('status', ['pending', 'running', 'completed', 'failed', 'stoped'])->default('pending')->comment('Статус задачи');
+            $table->string('method_name')->comment('Имя метода для выполнения');
+            $table->string('cron_expression')->comment('Cron-выражение для расписания');
+            $table->boolean('is_one_time')->default(false)->comment('Флаг одноразовой задачи');
+            $table->text('data')->comment('Данные задачи в формате JSON');
+            $table->timestamp('finished')->nullable()->comment('Время завершения задачи');
             $table->timestamps();
         });
     }

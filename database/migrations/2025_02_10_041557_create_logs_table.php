@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('task_id');
+            $table->unsignedBigInteger('task_id')->comment('Идентификатор связанной задачи');
             $table->text('message');
             $table->timestamps();
 
-            //$table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
+            // Внешний ключ для связи с таблицей tasks
+            // $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
         });
     }
 
@@ -29,3 +30,4 @@ return new class extends Migration
         Schema::dropIfExists('logs');
     }
 };
+
