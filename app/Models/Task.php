@@ -38,6 +38,7 @@ class Task extends Model
     {
         return $this->where('id', $this->id)
                     ->where('status', 'pending')
+                    ->lockForUpdate()
                     ->update(['status' => 'running']) > 0;
     }
 
